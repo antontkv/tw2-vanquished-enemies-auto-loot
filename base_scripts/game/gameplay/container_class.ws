@@ -28,7 +28,52 @@ class CContainer extends CGameplayEntity
 	//saved var wasUsed : bool;
 	
 	//default wasUsed = false;
-	
+
+	// Vanquished Enemies Auto Loot +++
+	function AutoLoot()
+	{
+		var sourceInv	: CInventoryComponent;
+		var targetInv	: CInventoryComponent;
+		var arrayData 	: array < CFlashValueScript >;
+		var itemId		: SItemUniqueId;
+		var allItems	: array< SItemUniqueId >;
+		var i			: int;
+
+		if ( isDynamic && IsLootable() && ! lockedByKey && ! IsQuestItem() && ! showInventoryAfterUse )
+		{
+			sourceInv = this.GetInventory();
+			targetInv = thePlayer.GetInventory();
+
+			sourceInv.GetAllItems( allItems );
+			for ( i = allItems.Size()-1; i >= 0; i-=1 )
+			{
+				itemId = allItems[i];
+				if ( sourceInv.ItemHasTag( itemId, 'NoDrop' ) )
+					continue;
+				if( !theGame.tutorialenabled )
+					CheckForTutorial(itemId, sourceInv);
+
+				if ( NameToString ( sourceInv.GetItemName( itemId ) ) == "Orens" ||
+					 sourceInv.ItemHasTag( itemId, 'SortTypeIngridient' ) )
+				{
+					if ( AllowItemDarkDiff( sourceInv, itemId ) )
+					{
+						Helper_TransferItemFromContainerToPlayer( itemId, targetInv, sourceInv, isDynamic );
+						theSound.PlaySound( "gui/hud/itemlooted" );
+					}
+				}
+			}
+
+			if ( !IsLootable() )
+			{
+				GetComponent("Loot").SetEnabled( false );
+				SetVisualsEmpty();
+				DestroyIt();
+			}
+		}
+	}
+	// Vanquished Enemies Auto Loot ---
+
 	// Entity was dynamically spawned
 	event OnSpawned( spawnData : SEntitySpawnData ) 
 	{
@@ -47,6 +92,7 @@ class CContainer extends CGameplayEntity
 			SetVisualsEmpty();
 			GetComponent("Loot").SetEnabled( false );
 		}
+		AutoLoot(); // Vanquished Enemies Auto Loot +
 	}
 	
 	event OnInteractionActivated( interactionName : name, activator : CEntity )
