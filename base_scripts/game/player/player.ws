@@ -3,7 +3,7 @@
 /** Witcher Script file
 /***********************************************************************/
 /** Object classes exprots
-/** Copyright © 2009 Dexio's Late Night R&D Home Center
+/** Copyright ï¿½ 2009 Dexio's Late Night R&D Home Center
 /***********************************************************************/
 
 struct SEnemySelection
@@ -239,6 +239,14 @@ import struct SMashQTEStartInfo
 	import var ignoreWrongInput : bool;
 }
 
+// Vanquished Enemies Auto Loot +++
+struct ItemCollectedInCombat
+{
+	var item : SItemUniqueId;
+	var quantity : int;
+}
+// Vanquished Enemies Auto Loot ---
+
 /////////////////////////////////////////////
 // Player class
 ///////////////////////////////////////////// 
@@ -457,6 +465,8 @@ import class CPlayer extends CActor
 						
 	
 	var arenaPoints : float;
+
+	private var itemsCollectedInCombat : array< ItemCollectedInCombat >;  // Vanquished Enemies Auto Loot +++
 	
 	function SetGameEnded()
 	{
@@ -2996,12 +3006,25 @@ import class CPlayer extends CActor
 		//theHud.m_messages.ShowInformationText( GetLocStringByKeyExt( "This item is to heavy" ));
 	//}
 	
-	private function InformGuiAboutAddedItem( itemId : SItemUniqueId, addedItemQuantity : int )
+	private function InformGuiAboutAddedItem( itemId : SItemUniqueId, addedItemQuantity : int, optional afterCombat : bool )  // Vanquished Enemies Auto Loot: Add afterCombat argument
 	{
 		var inv 		: CInventoryComponent = GetInventory();
 		var itemTags	: array< name >;
 		var itemName  	: name = inv.GetItemName( itemId );
+		var addClearDelay : int = 0;  // Vanquished Enemies Auto Loot +
 		var arrayData 	: array < CFlashValueScript >;
+
+		// Vanquished Enemies Auto Loot +++
+		if ( IsInCombat() )
+		{
+			AddToItemsCollectedInCombat( itemId, addedItemQuantity);
+			return;
+		}
+		if ( afterCombat )
+		{
+			addClearDelay = ( this.itemsCollectedInCombat.Size() / 2 ) + 1;
+		}
+		// Vanquished Enemies Auto Loot ---
 		
 		if ( !theGame.IsCurrentlyPlayingNonGameplayScene() )
 		{
@@ -3013,11 +3036,60 @@ import class CPlayer extends CActor
 				theHud.InvokeManyArgs("pHUD.addRecievedList", arrayData );
 				if ( m_isSpawned )
 				{
-					AddTimer( 'GuiClearReceivedList', 3, false );
+					AddTimer( 'GuiClearReceivedList', 3 + addClearDelay, false );  // Vanquished Enemies Auto Loot: Add addClearDelay to original value of 3
 				}
 			}
 		}
 	}
+
+	// Vanquished Enemies Auto Loot +++
+	function AddToItemsCollectedInCombat( itemId : SItemUniqueId, addedItemQuantity : int )
+	{
+		var i : int;
+		var itemCollectedInCombat : ItemCollectedInCombat;
+		var newItemCollectedInCombat : ItemCollectedInCombat;
+		var inv : CInventoryComponent = GetInventory();
+		var was : int;
+		var found : bool;
+
+		found = false;
+		for ( i=0; i<this.itemsCollectedInCombat.Size(); i+=1 )
+		{
+			itemCollectedInCombat = this.itemsCollectedInCombat[i];
+			if ( inv.GetItemName(itemId) == inv.GetItemName(itemCollectedInCombat.item) )
+			{
+				was = itemCollectedInCombat.quantity;
+				itemCollectedInCombat.quantity += addedItemQuantity;
+				this.itemsCollectedInCombat.Erase(i);
+				this.itemsCollectedInCombat.PushBack(itemCollectedInCombat);
+				found = true;
+				break;
+			}
+		}
+
+		if ( ! found )
+		{
+			newItemCollectedInCombat.item = itemId;
+			newItemCollectedInCombat.quantity = addedItemQuantity;
+			this.itemsCollectedInCombat.PushBack( newItemCollectedInCombat );
+		}
+
+	}
+
+	function ShowItemsCollectedInCombat()
+	{
+		var i : int;
+		var itemCollectedInCombat : ItemCollectedInCombat;
+
+		for ( i=0; i<this.itemsCollectedInCombat.Size(); i+=1 )
+		{
+			itemCollectedInCombat = this.itemsCollectedInCombat[i];
+			InformGuiAboutAddedItem( itemCollectedInCombat.item, itemCollectedInCombat.quantity, true );
+		}
+		theSound.PlaySound( "gui/hud/manyitemslooted" );
+		this.itemsCollectedInCombat.Clear();
+	}
+	// Vanquished Enemies Auto Loot ---
 
 	final function SetAutoMountWithBlackScreen( enable : bool )
 	{
@@ -3853,6 +3925,7 @@ mBoolean( true ) );
 		{
 			theHud.m_fx.CombatModeStart();
 			this.wasInCombatMode = true; // HUD OPT by Dex
+			this.itemsCollectedInCombat.Clear();  // Vanquished Enemies Auto Loot +
 		}
 	}
 	
@@ -3867,6 +3940,7 @@ mBoolean( true ) );
 		this.wasInCombatMode = false; // HUD OPT by Dex
 		theGame.ReleaseNoSaveLock( combatModeSaveLock );
 		combatModeSaveLock = -1;
+		ShowItemsCollectedInCombat();   // Vanquished Enemies Auto Loot +
 	}	
 	
 	// TOXICITY FUNCTIONS
@@ -7521,7 +7595,7 @@ thePlayer.RemoveAllBuffs();
 				if ( !FactsDoesExist('import_item_dyaebl') )
 				{
 					FactsAdd( 'import_item_dyaebl', 1 );
-					Log( "Importing equipped item: D’yaebl " );
+					Log( "Importing equipped item: Dï¿½yaebl " );
 					thePlayer.GetInventory().AddItem(StringToName("Dyaebl"), 1);
 				}
 			}
@@ -7530,7 +7604,7 @@ thePlayer.RemoveAllBuffs();
 				if ( !FactsDoesExist('import_item_ardaenye') )
 				{
 					FactsAdd( 'import_item_ardaenye', 1 );
-					Log( "Importing equipped item: Ard’aenye " );
+					Log( "Importing equipped item: Ardï¿½aenye " );
 					thePlayer.GetInventory().AddItem(StringToName("Ardaenye"), 1);
 				}
 			}
