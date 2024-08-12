@@ -53,14 +53,10 @@ class CContainer extends CGameplayEntity
 				if( !theGame.tutorialenabled )
 					CheckForTutorial(itemId, sourceInv);
 
-				if ( NameToString ( sourceInv.GetItemName( itemId ) ) == "Orens" ||
+				if ( sourceInv.GetItemName( itemId ) == 'Orens' ||
 					 sourceInv.ItemHasTag( itemId, 'SortTypeIngridient' ) )
 				{
-					if ( AllowItemDarkDiff( sourceInv, itemId ) )
-					{
-						Helper_TransferItemFromContainerToPlayer( itemId, targetInv, sourceInv, isDynamic );
-						theSound.PlaySound( "gui/hud/itemlooted" );
-					}
+					if ( AllowItemDarkDiff( sourceInv, itemId ) ) Helper_TransferItemFromContainerToPlayer( itemId, targetInv, sourceInv, isDynamic );
 				}
 			}
 
