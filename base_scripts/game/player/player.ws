@@ -3086,7 +3086,8 @@ import class CPlayer extends CActor
 			itemCollectedInCombat = this.itemsCollectedInCombat[i];
 			InformGuiAboutAddedItem( itemCollectedInCombat.item, itemCollectedInCombat.quantity, true );
 		}
-		theSound.PlaySound( "gui/hud/manyitemslooted" );
+		if ( this.itemsCollectedInCombat.Size() > 0)
+			theSound.PlaySound( "gui/hud/manyitemslooted" );
 		this.itemsCollectedInCombat.Clear();
 	}
 	// Vanquished Enemies Auto Loot ---
