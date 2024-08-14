@@ -3926,7 +3926,6 @@ mBoolean( true ) );
 		{
 			theHud.m_fx.CombatModeStart();
 			this.wasInCombatMode = true; // HUD OPT by Dex
-			this.itemsCollectedInCombat.Clear();  // Vanquished Enemies Auto Loot +
 		}
 	}
 	
