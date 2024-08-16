@@ -39,7 +39,7 @@ class CContainer extends CGameplayEntity
 		var allItems	: array< SItemUniqueId >;
 		var i			: int;
 
-		if ( isDynamic && IsLootable() && ! lockedByKey && ! IsQuestItem() && ! showInventoryAfterUse )
+		if ( isDynamic && IsLootable() && ! lockedByKey && ! IsQuestItem() && ! showInventoryAfterUse && thePlayer.IsInCombat() )
 		{
 			sourceInv = this.GetInventory();
 			targetInv = thePlayer.GetInventory();
