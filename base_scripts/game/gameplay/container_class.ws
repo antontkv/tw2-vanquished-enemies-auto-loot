@@ -34,7 +34,6 @@ class CContainer extends CGameplayEntity
 	{
 		var sourceInv	: CInventoryComponent;
 		var targetInv	: CInventoryComponent;
-		var arrayData 	: array < CFlashValueScript >;
 		var itemId		: SItemUniqueId;
 		var allItems	: array< SItemUniqueId >;
 		var i			: int;
@@ -53,8 +52,7 @@ class CContainer extends CGameplayEntity
 				if( !theGame.tutorialenabled )
 					CheckForTutorial(itemId, sourceInv);
 
-				if ( sourceInv.GetItemName( itemId ) == 'Orens' ||
-					 sourceInv.ItemHasTag( itemId, 'SortTypeIngridient' ) )
+				if ( sourceInv.GetItemName( itemId ) == 'Orens' || sourceInv.ItemHasTag( itemId, 'SortTypeIngridient' ) )
 				{
 					if ( AllowItemDarkDiff( sourceInv, itemId ) ) Helper_TransferItemFromContainerToPlayer( itemId, targetInv, sourceInv, isDynamic );
 				}
@@ -67,6 +65,30 @@ class CContainer extends CGameplayEntity
 				DestroyIt();
 			}
 		}
+	}
+
+	function IsOnlyAutoLootableItems(): bool
+	{
+		var sourceInv: CInventoryComponent;
+		var allItems: array< SItemUniqueId >;
+		var itemId: SItemUniqueId;
+		var i: int;
+
+		sourceInv = this.GetInventory();
+		sourceInv.GetAllItems( allItems );
+
+		for ( i = allItems.Size()-1; i >= 0; i-=1 )
+		{
+			itemId = allItems[i];
+			if ( sourceInv.ItemHasTag( itemId, 'NoDrop' ) )
+				continue;
+
+			if ( sourceInv.GetItemName( itemId ) == 'Orens' || sourceInv.ItemHasTag( itemId, 'SortTypeIngridient' ) )
+				continue;
+
+			return false;
+		}
+		return true;
 	}
 	// Vanquished Enemies Auto Loot ---
 
@@ -234,7 +256,7 @@ class CContainer extends CGameplayEntity
 		
 		if ( thePlayer.IsDead() ) return false;
 		
-		if ( theGame.IsUsingPad() || showInventoryAfterUse ) 
+		if ( theGame.IsUsingPad() || showInventoryAfterUse || IsOnlyAutoLootableItems() )  // Vanquished Enemies Auto Loot: Add || IsOnlyAutoLootableItems()
 		{
 			TakeAllItems();
 			QuestItemGlow();
