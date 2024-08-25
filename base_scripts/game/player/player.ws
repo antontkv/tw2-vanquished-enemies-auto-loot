@@ -3,7 +3,7 @@
 /** Witcher Script file
 /***********************************************************************/
 /** Object classes exprots
-/** Copyright ï¿½ 2009 Dexio's Late Night R&D Home Center
+/** Copyright © 2009 Dexio's Late Night R&D Home Center
 /***********************************************************************/
 
 struct SEnemySelection
@@ -7595,7 +7595,7 @@ thePlayer.RemoveAllBuffs();
 				if ( !FactsDoesExist('import_item_dyaebl') )
 				{
 					FactsAdd( 'import_item_dyaebl', 1 );
-					Log( "Importing equipped item: Dï¿½yaebl " );
+					Log( "Importing equipped item: D’yaebl " );
 					thePlayer.GetInventory().AddItem(StringToName("Dyaebl"), 1);
 				}
 			}
@@ -7604,7 +7604,7 @@ thePlayer.RemoveAllBuffs();
 				if ( !FactsDoesExist('import_item_ardaenye') )
 				{
 					FactsAdd( 'import_item_ardaenye', 1 );
-					Log( "Importing equipped item: Ardï¿½aenye " );
+					Log( "Importing equipped item: Ard’aenye " );
 					thePlayer.GetInventory().AddItem(StringToName("Ardaenye"), 1);
 				}
 			}
